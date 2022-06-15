@@ -11,8 +11,10 @@ void loop() {
   while (!Serial.available());
   
   // On sépare x et y
-  char * xString = strtok(Serial.readString(), ',');
-  char * yString = strtok(NULL, ','); // NULL pour le second appel, voir le man de la fonction
+  String tmp = Serial.readString();
+  int sep = tmp.indexOf(',');
+  String xString = tmp.substring(0, sep);
+  String yString = tmp.substring(sep, tmp.length());
 
   // On cast les string en int (c'est le type d'origine)
   int x = xString.toInt();
