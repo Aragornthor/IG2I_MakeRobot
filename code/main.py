@@ -6,7 +6,8 @@ import sys
 
 def getPosition():
     hedge = MarvelmindHedge(tty = "/dev/ttyACM0", adr=None, debug=False) # create MarvelmindHedge thread
-    
+    arduino = serial.Serial(port='/dev/ttyS0', baudrate=115200, timeout=.1)
+
     if (len(sys.argv)>1):
         hedge.tty= sys.argv[1]
     
@@ -16,36 +17,20 @@ def getPosition():
             hedge.dataEvent.wait(1)
             hedge.dataEvent.clear()
 
-            if (hedge.positionUpdated):
-                hedge.print_position()
-                
-            if (hedge.distancesUpdated):
-                hedge.print_distances()
-                
-            if (hedge.rawImuUpdated):
-                hedge.print_raw_imu()
-                
-            if (hedge.fusionImuUpdated):
-                hedge.print_imu_fusion()
-                
-            if (hedge.telemetryUpdated):
-                hedge.print_telemetry()
-                
-            if (hedge.qualityUpdated):
-                hedge.print_quality()
-                
-            if (hedge.waypointsUpdated):
-                hedge.print_waypoint()
+            sendToArduino(arduino, hedge.position()[0], hedge.position()[1]);
+            print("X = " + hedge.position()[0])
+            print("Y = " + hedge.position()[1])
+
+            sendToArduino()
         except KeyboardInterrupt:
             hedge.stop()  # stop and close serial port
             sys.exit()
 
 
-def sendToArduino(x, y):
-    arduino = serial.Serial(port='COM4', baudrate=115200, timeout=.1)
-    arduino.write(bytes(str(x) + "," + str(y), 'utf-8'))
+def sendToArduino(ar, x, y):
+    ar.write(bytes(str(x) + "," + str(y), 'utf-8'))
     time.sleep(0.05)
-    data = arduino.readline()
+    data = ar.readline()
     return data
 
 
